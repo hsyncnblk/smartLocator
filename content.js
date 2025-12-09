@@ -4,6 +4,27 @@ let highlightBox = null;
 
 console.log("🚀 Locator Pro: Ajan Yüklendi!");
 
+// *** YENİ EKLEME 1: İLK YÜKLEME KONTROLÜ ***
+// Sayfa yüklendiğinde, saklama alanını kontrol et.
+chrome.storage.local.get('isPickingActive', (data) => {
+    // Panel açık değilse veya daha önce kapatılmışsa isPicking'i false yap.
+    if (data.isPickingActive === false || data.isPickingActive === undefined) {
+        isPicking = false; 
+    }
+});
+
+// *** YENİ EKLEME 2: SAKLAMA DEĞİŞİKLİKLERİNİ DİNLEME ***
+// Bu dinleyici, Panel kapandığında isPickingActive'in 'false' olmasını anında yakalar.
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.isPickingActive) {
+        const isActive = changes.isPickingActive.newValue;
+        if (isActive === false) {
+            stopPickingMode(); // Seçim modunu kapat
+        }
+    }
+});
+
+
 // --- MESAJLARI DİNLE (Sidepanel'den gelen emirler) ---
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === "startPicking") {
@@ -25,12 +46,12 @@ function stopPickingMode() {
 
 // --- MOUSE EVENTS ---
 document.addEventListener("mousemove", (e) => {
-  if (!isPicking) return;
+  if (!isPicking) return; // isPicking false ise (panel kapalıysa) buradan döner.
   highlight(e.target);
 }, true);
 
 document.addEventListener("click", (e) => {
-  if (!isPicking) return;
+  if (!isPicking) return; // isPicking false ise (panel kapalıysa) buradan döner.
 
   e.preventDefault();
   e.stopPropagation();
