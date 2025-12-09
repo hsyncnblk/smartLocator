@@ -9,8 +9,16 @@ const closeBtn = document.getElementById("close-btn");
 
 // 1. KAPATMA BUTONU
 closeBtn.addEventListener("click", () => {
-  sendMsg("stopPicking");
-  window.close();
+  // *** YENİ EKLENEN/GÜNCELLENEN KOD BAŞLANGICI: Çarpı butonuna basınca toggle'ı pasifleştir.
+  if (toggle.checked) {
+    toggle.checked = false;
+    statusText.textContent = "Seçim Kapalı";
+    statusText.style.color = "#888";
+  }
+  // *** YENİ EKLENEN/GÜNCELLENEN KOD BİTİŞİ ***
+
+  sendMsg("stopPicking"); // Content Script'e Seçim modunu kapatma emri gönder
+  window.close();         // Yan paneli kapat
 });
 
 // 2. TOGGLE DEĞİŞİMİ
@@ -106,9 +114,10 @@ function formatCode(loc) {
         strategy = "css";
       }
 
-      // Format: @FindBy(id = "user") public WebElement userInput;
+      // Format: @FindBy(id = "user") private WebElement userInput;
+      // 'public' kelimesi 'private' olarak değiştirildi
       // HTML karakterlerini (örn: &nbsp;) kaçış karakterine çevirmek gerekebilir ama şimdilik raw bırakıyoruz.
-      return `@FindBy(${strategy} = "${actualVal}")\npublic WebElement ${varName};`;
+      return `@FindBy(${strategy} = "${actualVal}")\n private WebElement ${varName};`;
 
     case "playwright":
       if (loc.type === "Text") return `await page.getByText('${val}').click();`;
